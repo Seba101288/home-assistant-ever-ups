@@ -17,7 +17,6 @@ from .const import (
     SNMP_OID_IDENT_PRODUCT_NAME,
     SNMP_OID_IDENT_PRODUCT_NAME_XUPS,
     SNMP_OID_IDENT_SERIAL_NUMBER,
-    SNMP_OID_IDENT_SERIAL_NUMBER_XUPS,
 )
 from .coordinator import SnmpCoordinator
 
@@ -52,11 +51,7 @@ class SnmpEntity(CoordinatorEntity[SnmpCoordinator]):
     def identifier(self):
         """Return the device identifier."""
         return self.coordinator.data.get(
-            SNMP_OID_IDENT_SERIAL_NUMBER,
-            self.coordinator.data.get(
-                SNMP_OID_IDENT_SERIAL_NUMBER_XUPS,
-                self.coordinator.config_entry.data.get(ATTR_HOST)
-            ),
+            SNMP_OID_IDENT_SERIAL_NUMBER
         )
 
     @property
@@ -71,9 +66,7 @@ class SnmpEntity(CoordinatorEntity[SnmpCoordinator]):
                 self.coordinator.data.get(SNMP_OID_IDENT_PRODUCT_NAME_XUPS),
             ),
             serial_number=self.coordinator.data.get(
-                SNMP_OID_IDENT_SERIAL_NUMBER,
-                self.coordinator.data.get(SNMP_OID_IDENT_SERIAL_NUMBER_XUPS),
-            ),
+                SNMP_OID_IDENT_SERIAL_NUMBER),
             sw_version=self.coordinator.data.get(
                 SNMP_OID_IDENT_FIRMWARE_VERSION,
                 self.coordinator.data.get(SNMP_OID_IDENT_FIRMWARE_VERSION_XUPS),

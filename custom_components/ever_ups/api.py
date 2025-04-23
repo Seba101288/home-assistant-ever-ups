@@ -1,4 +1,4 @@
-"""API for Eaton UPS."""
+"""API for Ever UPS."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SnmpApi:
-    """Provide an api for Eaton UPS."""
+    """Provide an api for Ever UPS."""
 
     def __init__(self, data: Mapping[str, Any], snmpEngine: SnmpEngine) -> None:
         """Init the SnmpApi."""

@@ -1,0 +1,43 @@
+{
+  "state": {
+    "ever_ups__bat_status": {
+      "1": "unknown",
+      "2": "Normal",
+      "3": "Low",
+      "4": "Depleted",
+      "5": "Discharging",
+      "6": "Failure"
+    },
+    "ever_ups__battery_test_status": {
+      "1": "Unknow",
+      "2": "In Progress",
+      "3": "Passed",
+      "4": "Failed",
+      "5": "Not Supported",
+      "6": "Annnulled"
+    },
+    "ever_ups__system_status": {
+      "1": "Power_on",
+      "2": "Standby",
+      "3": "Bypass",
+      "4": "Line",
+      "5": "Battery",
+      "6": "Battery_Test",
+      "7": "Fault",
+      "8": "Convert",
+      "9": "Eco",
+      "10": "Shutdown",
+      "11": "On_booster",
+      "12": "Other"  
+    },
+    "ever_ups__output_source": {
+      "1": "Other",
+      "2": "None",
+      "3": "Normal",
+      "4": "Bypass",
+      "5": "Battery",
+      "6": "Booster",
+      "7": "Reducer"
+    }
+  }
+}

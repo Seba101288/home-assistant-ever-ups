@@ -1,4 +1,4 @@
-"""Support for Eaton UPS sensors."""
+"""Support for Ever UPS sensors."""
 
 from __future__ import annotations
 
@@ -23,34 +23,25 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.dt import get_time_zone
 
 from .const import (
-    SNMP_OID_BATTERY_ABM_STATUS,
+    SNMP_OID_BATTERY_STATUS,
     SNMP_OID_BATTERY_CAPACITY,
-    SNMP_OID_BATTERY_CURRENT,
     SNMP_OID_BATTERY_LAST_REPLACED,
     SNMP_OID_BATTERY_REMAINING,
     SNMP_OID_BATTERY_TEST_STATUS,
     SNMP_OID_BATTERY_VOLTAGE,
-    SNMP_OID_INPUT_CURRENT,
-    SNMP_OID_INPUT_NAME,
     SNMP_OID_INPUT_NUM_PHASES,
-    SNMP_OID_INPUT_SOURCE,
-    SNMP_OID_INPUT_STATUS,
     SNMP_OID_INPUT_VOLTAGE,
-    SNMP_OID_INPUT_WATTS,
-    SNMP_OID_OUTPUT_CURRENT,
     SNMP_OID_OUTPUT_LOAD,
-    SNMP_OID_OUTPUT_NAME,
     SNMP_OID_OUTPUT_NUM_PHASES,
-    SNMP_OID_OUTPUT_SOURCE,
-    SNMP_OID_OUTPUT_STATUS,
     SNMP_OID_OUTPUT_VOLTAGE,
-    SNMP_OID_OUTPUT_WATTS,
-    AbmStatus,
+    SNMP_OID_SYSTEM_STATUS,
+    SNMP_OID_OUTPUT_SOURCE,
+
+    SysStatus,
+    BatStatus,
     BatteryTestStatus,
-    InputSource,
-    InputStatus,
     OutputSource,
-    OutputStatus,
+
 )
 from .coordinator import SnmpCoordinator
 from .entity import SnmpEntity
@@ -67,16 +58,13 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     entities: list[SensorEntity] = [
         SnmpBatteryVoltageSensorEntity(coordinator),
-        # SnmpBatteryCurrentSensorEntity(coordinator),
         SnmpBatteryCapacitySensorEntity(coordinator),
-        SnmpBatteryAbmStatusSensorEntity(coordinator),
+        SnmpBatteryStatusSensorEntity(coordinator),
         SnmpBatteryLastReplacedSensorEntity(coordinator),
         SnmpBatteryRemainingSensorEntity(coordinator),
         SnmpBatteryTestStatusSensorEntity(coordinator),
-        SnmpInputSourceSensorEntity(coordinator),
-        SnmpInputStatusSensorEntity(coordinator),
+        SnmpSystemStatusSensorEntity(coordinator),
         SnmpOutputSourceSensorEntity(coordinator),
-        SnmpOutputStatusSensorEntity(coordinator),
     ]
 
     for index in range(
@@ -84,23 +72,19 @@ async def async_setup_entry(
         coordinator.data.get(SNMP_OID_INPUT_NUM_PHASES, 0) + 1,
     ):
         entities.append(SnmpInputVoltageSensorEntity(coordinator, index))
-        # entities.append(SnmpInputCurrentSensorEntity(coordinator, index))
-        # entities.append(SnmpInputWattsSensorEntity(coordinator, index))
 
     for index in range(
         1,
         coordinator.data.get(SNMP_OID_OUTPUT_NUM_PHASES, 0) + 1,
     ):
         entities.append(SnmpOutputVoltageSensorEntity(coordinator, index))
-        entities.append(SnmpOutputCurrentSensorEntity(coordinator, index))
-        entities.append(SnmpOutputWattsSensorEntity(coordinator, index))
         entities.append(SnmpOutputLoadSensorEntity(coordinator, index))
 
     async_add_entities(entities)
 
 
 class SnmpSensorEntity(SnmpEntity, SensorEntity):
-    """Representation of a Eaton UPS sensor."""
+    """Representation of a Ever UPS sensor."""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -109,7 +93,7 @@ class SnmpSensorEntity(SnmpEntity, SensorEntity):
     _default_value: float = 0.0
 
     def __init__(self, coordinator: SnmpCoordinator, index: str = "") -> None:
-        """Initialize a Eaton UPS sensor."""
+        """Initialize a Ever UPS sensor."""
         super().__init__(coordinator, index)
         self._attr_native_value = self.coordinator.data.get(
             self._value_oid, self._default_value
@@ -130,33 +114,31 @@ class SnmpSensorEntity(SnmpEntity, SensorEntity):
 
 
 class SnmpBatterySensorEntity(SnmpSensorEntity):
-    """Representation of a Eaton UPS battery sensor."""
+    """Representation of a Ever UPS battery sensor."""
 
     _name_prefix = "Battery"
 
+class SnmpSystemSensorEntity(SnmpSensorEntity):
+    """Representation of a Ever UPS system sensor."""
+
+    _name_prefix = "System"    
+
 
 class SnmpBatteryVoltageSensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery voltage sensor."""
+    """Representation of a Ever UPS battery voltage sensor."""
 
     _attr_device_class = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _multiplier = 0.1
 
     _name_suffix = "Voltage"
     _value_oid = SNMP_OID_BATTERY_VOLTAGE
 
 
-class SnmpBatteryCurrentSensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery current sensor."""
-
-    _attr_device_class = SensorDeviceClass.CURRENT
-    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
-
-    _name_suffix = "Current"
-    _value_oid = SNMP_OID_BATTERY_CURRENT
 
 
 class SnmpBatteryCapacitySensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery watts sensor."""
+    """Representation of a Ever UPS battery watts sensor."""
 
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_native_unit_of_measurement = PERCENTAGE
@@ -165,20 +147,20 @@ class SnmpBatteryCapacitySensorEntity(SnmpBatterySensorEntity):
     _value_oid = SNMP_OID_BATTERY_CAPACITY
 
 
-class SnmpBatteryAbmStatusSensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery abm status sensor."""
+class SnmpBatteryStatusSensorEntity(SnmpBatterySensorEntity):
+    """Representation of a Ever UPS battery status sensor."""
 
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_state_class = None
-    _attr_translation_key = "abm_status"
-    _attr_options = [abm_status.value for abm_status in AbmStatus]
+    _attr_translation_key = "bat_status"
+    _attr_options = [bat_status.value for bat_status in BatStatus]
 
-    _name_suffix = "ABM Status"
-    _value_oid = SNMP_OID_BATTERY_ABM_STATUS
+    _name_suffix = "Status"
+    _value_oid = SNMP_OID_BATTERY_STATUS
 
 
 class SnmpBatteryLastReplacedSensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery last replaced sensor."""
+    """Representation of a Ever UPS battery last replaced sensor."""
 
     _attr_device_class = SensorDeviceClass.DATE
     _attr_state_class = None
@@ -191,7 +173,7 @@ class SnmpBatteryLastReplacedSensorEntity(SnmpBatterySensorEntity):
         """Return the value reported by the sensor."""
         try:
             return (
-                datetime.strptime(self._attr_native_value, "%m/%d/%Y")
+                datetime.strptime(self._attr_native_value, "%Y/%m/%d")
                 .replace(tzinfo=get_time_zone(self.coordinator.hass.config.time_zone))
                 .date()
             )
@@ -200,17 +182,17 @@ class SnmpBatteryLastReplacedSensorEntity(SnmpBatterySensorEntity):
 
 
 class SnmpBatteryRemainingSensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery last replaced sensor."""
+    """Representation of a Ever UPS battery last replaced sensor."""
 
     _attr_device_class = SensorDeviceClass.DURATION
-    _attr_native_unit_of_measurement = UnitOfTime.SECONDS
+    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
 
     _name_suffix = "Remaining"
-    _value_oid = SNMP_OID_BATTERY_REMAINING
+    _value_oid = SNMP_OID_BATTERY_REMAINING 
 
 
 class SnmpBatteryTestStatusSensorEntity(SnmpBatterySensorEntity):
-    """Representation of a Eaton UPS battery test status sensor."""
+    """Representation of a Ever UPS battery test status sensor."""
 
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_entity_category = EntityCategory.DIAGNOSTIC
@@ -223,111 +205,59 @@ class SnmpBatteryTestStatusSensorEntity(SnmpBatterySensorEntity):
     _name_suffix = "Test Status"
     _value_oid = SNMP_OID_BATTERY_TEST_STATUS
 
+class SnmpSystemStatusSensorEntity(SnmpSystemSensorEntity):
+    """Representation of a Ever UPS system status status sensor."""
+
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_state_class = None
+    _attr_translation_key = "system_status"
+    _attr_options = [system_status.value for system_status in SysStatus]
+
+    _name_suffix = "Status"
+    _value_oid = SNMP_OID_SYSTEM_STATUS
+
 
 class SnmpInputSensorEntity(SnmpSensorEntity):
-    """Representation of a Eaton UPS input sensor."""
+    """Representation of a Ever UPS input sensor."""
 
-    _name_oid = SNMP_OID_INPUT_NAME
+    _name_oid = "1"
     _name_prefix = "Input"
 
 
 class SnmpInputVoltageSensorEntity(SnmpInputSensorEntity):
-    """Representation of a Eaton UPS input voltage sensor."""
+    """Representation of a Ever UPS input voltage sensor."""
 
     _attr_device_class = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_entity_registry_visible_default = False
 
     _name_suffix = "Voltage"
+    _multiplier = 0.1
     _value_oid = SNMP_OID_INPUT_VOLTAGE
 
 
-class SnmpInputCurrentSensorEntity(SnmpInputSensorEntity):
-    """Representation of a Eaton UPS input current sensor."""
-
-    _attr_device_class = SensorDeviceClass.CURRENT
-    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
-    _attr_entity_registry_visible_default = False
-
-    _name_suffix = "Current"
-    _value_oid = SNMP_OID_INPUT_CURRENT
-
-
-class SnmpInputWattsSensorEntity(SnmpInputSensorEntity):
-    """Representation of a Eaton UPS input watts sensor."""
-
-    _attr_device_class = SensorDeviceClass.POWER
-    _attr_native_unit_of_measurement = UnitOfPower.WATT
-
-    _name_suffix = "Watts"
-    _value_oid = SNMP_OID_INPUT_WATTS
-
-
-class SnmpInputSourceSensorEntity(SnmpInputSensorEntity):
-    """Representation of a Eaton UPS input source sensor."""
-
-    _attr_device_class = SensorDeviceClass.ENUM
-    _attr_state_class = None
-    _attr_translation_key = "input_source"
-    _attr_options = [input_source.value for input_source in InputSource]
-
-    _name_suffix = "Source"
-    _value_oid = SNMP_OID_INPUT_SOURCE
-
-
-class SnmpInputStatusSensorEntity(SnmpInputSensorEntity):
-    """Representation of a Eaton UPS input status sensor."""
-
-    _attr_device_class = SensorDeviceClass.ENUM
-    _attr_state_class = None
-    _attr_translation_key = "input_status"
-    _attr_options = [input_status.value for input_status in InputStatus]
-
-    _name_suffix = "Status"
-    _value_oid = SNMP_OID_INPUT_STATUS
 
 
 class SnmpOutputSensorEntity(SnmpSensorEntity):
-    """Representation of a Eaton UPS output sensor."""
+    """Representation of a Ever UPS output sensor."""
 
-    _name_oid = SNMP_OID_OUTPUT_NAME
+    _name_oid = "1"
     _name_prefix = "Output"
 
 
 class SnmpOutputVoltageSensorEntity(SnmpOutputSensorEntity):
-    """Representation of a Eaton UPS output voltage sensor."""
+    """Representation of a Ever UPS output voltage sensor."""
 
     _attr_device_class = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_entity_registry_visible_default = False
-
+    _multiplier = 0.1
     _name_suffix = "Voltage"
     _value_oid = SNMP_OID_OUTPUT_VOLTAGE
 
 
-class SnmpOutputCurrentSensorEntity(SnmpOutputSensorEntity):
-    """Representation of a Eaton UPS output current sensor."""
-
-    _attr_device_class = SensorDeviceClass.CURRENT
-    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
-    _attr_entity_registry_visible_default = False
-
-    _name_suffix = "Current"
-    _value_oid = SNMP_OID_OUTPUT_CURRENT
-
-
-class SnmpOutputWattsSensorEntity(SnmpOutputSensorEntity):
-    """Representation of a Eaton UPS output watts sensor."""
-
-    _attr_device_class = SensorDeviceClass.POWER
-    _attr_native_unit_of_measurement = UnitOfPower.WATT
-
-    _name_suffix = "Watts"
-    _value_oid = SNMP_OID_OUTPUT_WATTS
-
-
 class SnmpOutputLoadSensorEntity(SnmpOutputSensorEntity):
-    """Representation of a Eaton UPS output watts sensor."""
+    """Representation of a Ever UPS output watts sensor."""
 
     _attr_native_unit_of_measurement = PERCENTAGE
 
@@ -347,13 +277,4 @@ class SnmpOutputSourceSensorEntity(SnmpOutputSensorEntity):
     _value_oid = SNMP_OID_OUTPUT_SOURCE
 
 
-class SnmpOutputStatusSensorEntity(SnmpOutputSensorEntity):
-    """Representation of a Eaton UPS output status sensor."""
 
-    _attr_device_class = SensorDeviceClass.ENUM
-    _attr_state_class = None
-    _attr_translation_key = "output_status"
-    _attr_options = [output_status.value for output_status in OutputStatus]
-
-    _name_suffix = "Status"
-    _value_oid = SNMP_OID_OUTPUT_STATUS

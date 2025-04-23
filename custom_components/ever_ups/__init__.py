@@ -1,4 +1,4 @@
-"""The Eaton UPS integration."""
+"""The Ever UPS integration."""
 
 from __future__ import annotations
 
@@ -11,8 +11,9 @@ from .coordinator import SnmpCoordinator
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Eaton UPS from a config entry."""
+    """Set up Ever UPS from a config entry."""
     snmpEngine = await async_get_snmp_engine(hass)
+
     coordinator = SnmpCoordinator(hass=hass, entry=entry, snmpEngine=snmpEngine)
     await coordinator.async_config_entry_first_refresh()
 

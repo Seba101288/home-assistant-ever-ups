@@ -1,4 +1,4 @@
-"""Config flow for Eaton UPS integration."""
+"""Config flow for Ever UPS integration."""
 from __future__ import annotations
 
 import voluptuous as vol
@@ -116,7 +116,7 @@ def get_v3_schema(data: ConfigType) -> Schema:
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Eaton UPS."""
+    """Handle a config flow for Ever UPS."""
 
     VERSION = 1
 
@@ -170,15 +170,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(
         config_entry: ConfigEntry,
     ) -> OptionsFlow:
-        """Options callback for Eaton UPS."""
+        """Options callback for Ever UPS."""
         return OptionsFlow(config_entry)
 
 
 class OptionsFlow(config_entries.OptionsFlow):
-    """Handle a options flow for Eaton UPS."""
+    """Handle a options flow for Ever UPS."""
 
     def __init__(self, entry: ConfigEntry) -> None:
-        """Initialize Eaton UPS options flow."""
+        """Initialize Ever UPS options flow."""
         self.config_entry = entry
         self.data = dict(entry.data)
 

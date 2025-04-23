@@ -60,45 +60,40 @@
   },
   "entity": {
     "sensor": {
-      "abm_status": {
+      "bat_status": {
         "state": {
-          "1": "Battery Charging",
-          "2": "Battery Discharging",
-          "3": "Battery Floating",
-          "4": "Battery Resting",
-          "5": "Unknown",
-          "6": "Battery Disconnected",
-          "7": "Battery Under Test",
-          "8": "Check Battery"
+          "1": "unknown",
+          "2": "Normal",
+          "3": "Low",
+          "4": "Depleted",
+          "5": "Discharging",
+          "6": "Failure"
         }
       },
       "battery_test_status": {
         "state": {
           "1": "Unknow",
-          "2": "Passed",
-          "3": "Failed",
-          "4": "In Progress",
+          "2": "In Progress",
+          "3": "Passed",
+          "4": "Failed",
           "5": "Not Supported",
-          "6": "Inhibited",
-          "7": "Scheduled"
+          "6": "Annnulled"
         }
       },
-      "input_source": {
+      "system_status": {
         "state": {
-          "1": "Other",
-          "2": "None",
-          "3": "Primary Utility",
-          "4": "Bypass Feed",
-          "5": "secondary Utility",
-          "6": "Generator",
-          "7": "Flywheel",
-          "8": "Fuelcell"
-        }
-      },
-      "input_status": {
-        "state": {
-          "1": "Bad",
-          "2": "Good"
+          "1": "Power_on",
+          "2": "Standby",
+          "3": "Bypass",
+          "4": "Line",
+          "5": "Battery",
+          "6": "Battery_Test",
+          "7": "Fault",
+          "8": "Convert",
+          "9": "Eco",
+          "10": "Shutdown",
+          "11": "On_booster",
+          "12": "Other"  
         }
       },
       "output_source": {
@@ -109,21 +104,7 @@
           "4": "Bypass",
           "5": "Battery",
           "6": "Booster",
-          "7": "Reducer",
-          "8": "Parallel Capacity",
-          "9": "Parallel Redundant",
-          "10": "High Efficiency Mode",
-          "11": "Maintenance Bypass",
-          "12": "ESS Mode"
-        }
-      },
-      "output_status": {
-        "state": {
-          "0": "Unknow",
-          "1": "Output Not Powered",
-          "2": "Output Not Protected",
-          "3": "Output Protected",
-          "4": "Output Powered No Continuity"
+          "7": "Reducer"
         }
       }
     }
