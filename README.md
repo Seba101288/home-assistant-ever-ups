@@ -17,7 +17,7 @@ Testing on NMC Ever powerline RT3000
 ### HACS
 The easiest way to install this component is by clicking the badge below, which adds this repo as a custom repo in your HASS instance.
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Seba101288&repository=home-assistant-ever-ups)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Seba101288&repository=https%3A%2F%2Fgithub.com%2FSeba101288%2Fhome-assistant-ever-ups&category=Integration)
 
 You can also add the integration manually by copying `custom_components/ever_ups` into `<HASS config directory>/custom_components`
 
