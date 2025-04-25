@@ -22,7 +22,7 @@ The easiest way to install this component is by clicking the badge below, which 
 You can also add the integration manually by copying `custom_components/ever_ups` into `<HASS config directory>/custom_components`
 
 
-## Configuration
+### Configuration
 
 * Browse to your Home Assistant instance.
 * Go to  Settings > Devices & Services.
