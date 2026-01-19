@@ -120,7 +120,7 @@ class SnmpApi:
     ) -> list:
         """Get table data for given OIDs with defined rown count."""
         _LOGGER.debug("Get %s bulk OID(s) %s", count, oids)
-        target = await self._get_target() # <--- Musisz to dodać tutaj!
+        target = await self._get_target() 
         result = []
         var_binds = __class__.construct_object_types(oids)
         for _i in range(count):
@@ -132,25 +132,27 @@ class SnmpApi:
             ) = await hlapi.bulk_cmd(
                 self._snmpEngine,
                 self._credentials,
-                target, # <--- Zmieniamy z self._target na target
+                target, 
                 hlapi.ContextData(),
                 start_from,
                 count,
                 *var_binds,
             )
 
-            if not error_indication and not error_status: # Poprawiony warunek
+            if not error_indication and not error_status:
                 items = {}
                 for var_bind_row in var_bind_table:
-                    for var_bind in var_bind_row:
-                        items[str(var_bind[0])] = __class__.cast(var_bind[1])
+                    if isinstance(var_bind_row, (list, tuple)):
+                        for var_bind in var_bind_row:
+                            items[str(var_bind[0])] = __class__.cast(var_bind[1])
+                    else:
+                        items[str(var_bind_row[0])] = __class__.cast(var_bind_row[1])
                 result.append(items)
-            else:
-                raise RuntimeError(
-                    f"Got SNMP error: {error_indication} {error_status} {error_index}"
-                )
 
-            var_binds = var_bind_table[-1]
+            if var_bind_table:
+                var_binds = var_bind_table[-1]
+            else:
+                break # Jeśli tabela jest pusta, przerywamy pętlę
 
         return result
     
