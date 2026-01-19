@@ -52,7 +52,7 @@ class SnmpApi:
         self._snmpEngine = snmpEngine
 
         try:
-            self._target = hlapi.UdpTransportTarget(
+            self._target = hlapi.UdpTransportTarget.create(
                 (
                     data.get(ATTR_HOST),
                     data.get(ATTR_PORT, SNMP_PORT_DEFAULT),
@@ -61,7 +61,7 @@ class SnmpApi:
             )
         except PySnmpError:
             try:
-                self._target = hlapi.Udp6TransportTarget(
+                self._target = hlapi.Udp6TransportTarget.create(
                     (
                         data.get(ATTR_HOST),
                         data.get(ATTR_PORT, SNMP_PORT_DEFAULT),
