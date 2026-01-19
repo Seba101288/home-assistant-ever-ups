@@ -50,29 +50,9 @@ class SnmpApi:
     def __init__(self, data: Mapping[str, Any], snmpEngine: SnmpEngine) -> None:
         """Init the SnmpApi."""
         self._snmpEngine = snmpEngine
-
-        try:
-            self._target = hlapi.UdpTransportTarget.create(
-                (
-                    data.get(ATTR_HOST),
-                    data.get(ATTR_PORT, SNMP_PORT_DEFAULT),
-                ),
-                10,
-            )
-        except PySnmpError:
-            try:
-                self._target = hlapi.Udp6TransportTarget.create(
-                    (
-                        data.get(ATTR_HOST),
-                        data.get(ATTR_PORT, SNMP_PORT_DEFAULT),
-                    ),
-                    10,
-                )
-            except PySnmpError as err:
-                _LOGGER.error("Invalid SNMP host: %s", err)
-                return
-
+        self._data = data
         self._version = data.get(ATTR_VERSION)
+
         if self._version == SnmpVersion.V1:
             self._credentials = hlapi.CommunityData(data.get(ATTR_COMMUNITY), mpModel=0)
         elif self._version == SnmpVersion.V3:
@@ -82,7 +62,16 @@ class SnmpApi:
                 data.get(ATTR_PRIV_KEY),
                 AUTH_MAP.get(data.get(ATTR_AUTH_PROTOCOL, AuthProtocol.NO_AUTH)),
                 PRIV_MAP.get(data.get(ATTR_PRIV_PROTOCOL, PrivProtocol.NO_PRIV)),
-            )
+            ) # <--- Tutaj brakowało nawiasu
+
+    async def _get_target(self):
+        """Pomocnicza metoda do tworzenia celu połączenia w locie."""
+        host = self._data.get(ATTR_HOST)
+        port = self._data.get(ATTR_PORT, SNMP_PORT_DEFAULT)
+        try:
+            return await hlapi.UdpTransportTarget.create((host, port), 10)
+        except:
+            return await hlapi.Udp6TransportTarget.create((host, port), 10)
 
     @staticmethod
     def construct_object_types(list_of_oids):
@@ -94,17 +83,18 @@ class SnmpApi:
 
     async def get(self, oids) -> dict:
         """Get data for given OIDs in a single call."""
+        target = await self._get_target()
+        
         while len(oids):
             _LOGGER.debug("Get OID(s) %s", oids)
-
             error_indication, error_status, error_index, var_binds = await hlapi.get_cmd(
                 self._snmpEngine,
                 self._credentials,
-                self._target,
+                target,
                 hlapi.ContextData(),
                 *__class__.construct_object_types(oids),
             )
-
+        
             if error_index:
                 _LOGGER.debug("Remove error index %d", error_index - 1)
                 oids.pop(error_index - 1)
@@ -130,6 +120,7 @@ class SnmpApi:
     ) -> list:
         """Get table data for given OIDs with defined rown count."""
         _LOGGER.debug("Get %s bulk OID(s) %s", count, oids)
+        target = await self._get_target() # <--- Musisz to dodać tutaj!
         result = []
         var_binds = __class__.construct_object_types(oids)
         for _i in range(count):
@@ -141,14 +132,14 @@ class SnmpApi:
             ) = await hlapi.bulk_cmd(
                 self._snmpEngine,
                 self._credentials,
-                self._target,
+                target, # <--- Zmieniamy z self._target na target
                 hlapi.ContextData(),
                 start_from,
                 count,
                 *var_binds,
             )
 
-            if not error_indication and not error_indication:
+            if not error_indication and not error_status: # Poprawiony warunek
                 items = {}
                 for var_bind_row in var_bind_table:
                     for var_bind in var_bind_row:
@@ -162,7 +153,7 @@ class SnmpApi:
             var_binds = var_bind_table[-1]
 
         return result
-
+    
     async def get_bulk_auto(
         self,
         oids,
@@ -170,8 +161,9 @@ class SnmpApi:
         start_from=1,
     ) -> list:
         """Get table data for given OIDs with determined rown count."""
+        res = await self.get([count_oid])
         return await self.get_bulk(
-            oids, await self.get([count_oid])[count_oid], start_from
+            oids, res[count_oid], start_from
         )
 
     @staticmethod
