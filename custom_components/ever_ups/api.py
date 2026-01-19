@@ -97,7 +97,7 @@ class SnmpApi:
         while len(oids):
             _LOGGER.debug("Get OID(s) %s", oids)
 
-            error_indication, error_status, error_index, var_binds = await hlapi.getCmd(
+            error_indication, error_status, error_index, var_binds = await hlapi.get_cmd(
                 self._snmpEngine,
                 self._credentials,
                 self._target,
@@ -138,7 +138,7 @@ class SnmpApi:
                 error_status,
                 error_index,
                 var_bind_table,
-            ) = await hlapi.bulkCmd(
+            ) = await hlapi.bulk_cmd(
                 self._snmpEngine,
                 self._credentials,
                 self._target,
