@@ -179,7 +179,9 @@ class OptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, entry: ConfigEntry) -> None:
         """Initialize Ever UPS options flow."""
-        self.config_entry = entry
+        # Nie przypisujemy self.config_entry bezpośrednio. 
+        # Używamy podkreślenia, aby uniknąć konfliktu z właściwością HA.
+        self._entry = entry 
         self.data = dict(entry.data)
 
     async def async_step_init(self, user_input: ConfigType | None = None) -> FlowResult:
@@ -210,7 +212,8 @@ class OptionsFlow(config_entries.OptionsFlow):
 
         self.data.update(v1_input)
 
-        self.hass.config_entries.async_update_entry(self.config_entry, data=self.data)
+        # Używamy self._entry zamiast self.config_entry
+        self.hass.config_entries.async_update_entry(self._entry, data=self.data)
 
         return self.async_create_entry(title="", data={})
 
@@ -223,7 +226,8 @@ class OptionsFlow(config_entries.OptionsFlow):
 
         self.data.update(v3_input)
 
-        self.hass.config_entries.async_update_entry(self.config_entry, data=self.data)
+        # Używamy self._entry zamiast self.config_entry
+        self.hass.config_entries.async_update_entry(self._entry, data=self.data)
 
         return self.async_create_entry(title="", data={})
 
